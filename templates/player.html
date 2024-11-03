@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-100 to-emerald-200 flex flex-col items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-4xl">
+        <h1 class="text-3xl font-bold text-center mb-6 text-emerald-700">File Viewer</h1>
+        <div class="mb-4">
+            <h2 class="text-xl font-semibold text-gray-800">{{ filename }}</h2>
+        </div>
+        <div class="w-full h-[60vh] bg-gray-100 rounded-lg overflow-hidden">
+            {% if file_type == 'video' %}
+                <video controls class="w-full h-full">
+                    <source src="{{ file_url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            {% elif file_type == 'audio' %}
+                <audio controls class="w-full mt-4">
+                    <source src="{{ file_url }}" type="audio/mpeg">
+                    Your browser does not support the audio tag.
+                </audio>
+            {% elif file_type == 'image' %}
+                <img src="{{ file_url }}" alt="{{ filename }}" class="w-full h-full object-contain">
+            {% elif file_type == 'pdf' %}
+                <iframe src="{{ file_url }}" class="w-full h-full"></iframe>
+            {% elif file_type == 'code' %}
+                <pre class="w-full h-full p-4 overflow-auto"><code id="codeContent"></code></pre>
+            {% else %}
+                <div class="flex items-center justify-center h-full">
+                    <p class="text-gray-500">Preview not available for this file type.</p>
+                </div>
+            {% endif %}
+        </div>
+        <div class="mt-4 flex justify-between">
+            <a href="{{ file_url }}" download class="inline-block bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-300">
+                Download
+            </a>
+        </div>
+    </div>
+    {% if file_type == 'code' %}
+    <script>
+        fetch('{{ file_url }}')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('codeContent').textContent = data;
+            });
+    </script>
+    {% endif %}
+</body>
+</html>

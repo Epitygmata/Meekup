@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeekUp - Share Your Stuff!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/javascript/javascript.min.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .loading-animation {
+            width: 100px;
+            height: 100px;
+            background-image: url('/static/images/loading.gif');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-green-100 to-emerald-200 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-4xl">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-4xl font-bold text-emerald-700">MeekUp</h1>
+            <a href="/logout" class="text-sm text-emerald-600 hover:text-emerald-800">Logout</a>
+        </div>
+        <div class="mb-6">
+            <h2 class="text-lg font-semibold mb-2">Your Storage</h2>
+            <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                <div class="bg-emerald-600 h-2.5 rounded-full" style="width: {{ storage_percentage }}%"></div>
+            </div>
+            <p class="text-sm text-gray-600 mt-1">{{ storage_usage|round(2) }} GB / {{ storage_limit }} GB</p>
+        </div>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="mb-6">
+                <label for="fileInput" class="block text-sm font-medium text-gray-700 mb-2">
+                    Choose a file to sned !
+                </label>
+                <div class="flex items-center justify-center w-full">
+                    <label for="fileInput" class="flex flex-col items-center justify-center w-full h-32 border-2 border-emerald-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg class="w-10 h-10 mb-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                            <p class="text-xs text-gray-500">Any file type (MAX. 5GB)</p>
+                        </div>
+                        <input id="fileInput" type="file" name="file" class="hidden">
+                    </label>
+                </div>
+            </div>
+            <button type="button" id="uploadButton" class="w-full bg-emerald-600 text-white py-2 px-4 rounded-md hover:bg-emerald-700 transition duration-300 flex items-center justify-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                </svg>
+                Meek It Up!
+            </button>
+        </form>
+        <div id="progressBarContainer" class="hidden mt-4">
+            <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                <div id="progressBar" class="bg-emerald-600 h-2.5 rounded-full" style="width: 0%"></div>
+            </div>
+        </div>
+        <div id="uploadStatus" class="mt-4"></div>
+        <div id="codeEditor" class="hidden mt-4">
+            <h3 class="text-lg font-semibold mb-2">Code Editor</h3>
+            <textarea id="codeArea"></textarea>
+        </div>
+        <div id="uploadedList" class="mt-8">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Your things:</h2>
+        </div>
+        <div class="mt-4">
+            <h3 class="text-lg font-semibold mb-2">Quick Share</h3>
+            <div class="flex items-center">
+                <input type="text" id="quickShareInput" placeholder="Enter file URL to share" class="flex-grow mr-2 p-2 border rounded">
+                <button id="quickShareButton" class="bg-emerald-600 text-white py-2 px-4 rounded-md hover:bg-emerald-700 transition duration-300">Share</button>
+            </div>
+            <p id="quickShareResult" class="mt-2 text-sm"></p>
+        </div>
+    </div>
+    <div id="loadingOverlay" class="fixed inset-0 bg-white flex items-center justify-center z-50 opacity-100 transition-opacity duration-500">
+        <div class="flex flex-col items-center">
+            <div class="loading-animation"></div>
+            <p class="mt-4 text-emerald-600 font-semibold">Loading...</p>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <footer class="fixed bottom-0 left-0 right-0 bg-emerald-800 text-white py-2 px-4 text-center text-sm">
+        <p id="footerJoke">Loading a joke...</p>
+    </footer>
+</body>
+</html>
